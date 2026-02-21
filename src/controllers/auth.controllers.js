@@ -2,6 +2,7 @@ import User from  "../models/users.model.js";
 import bcrypt from "bcrypt";
 import cookies from "cookie-parser";
 import jwt from "jsonwebtoken";
+import { sendRegistrationEmail, sendLoggedInEmail } from "../services/email.services.js";
 
 async function reggisterUser(req,res) {
     const {email,password,name} = req.body;
@@ -32,6 +33,8 @@ async function reggisterUser(req,res) {
         res.cookie("token", token, {
             httpOnly:true,
         })
+        await sendRegistrationEmail(user.email, user.name);
+
         return res.status(201).json({
             message:"User registered successfully",
             user:{
@@ -41,6 +44,7 @@ async function reggisterUser(req,res) {
             },
             token:token
         })
+
     }
     catch (error) {
         console.log("Error registering the user", error);
@@ -73,6 +77,7 @@ async function loginUser(req,res){
             httpOnly:true,
             secured:true
         };
+        await sendLoggedInEmail(user.email, user.name);
         return res.status(200).json({
             message:"User logged in successfully",
             user:{
