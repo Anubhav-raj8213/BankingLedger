@@ -4,13 +4,13 @@ const transactionSchema = new mongoose.Schema({
     fromAccountId:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Account",
-        required:true,
+        required:[  true, "Source account is required"],
         index:true
     },
     toAccountId:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Account",
-        required,
+        required:[true, "Destination account is required"],
         index:true
     },
     amount:{
