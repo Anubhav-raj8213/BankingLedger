@@ -1,5 +1,4 @@
-import Account from "../models/account.model.js";
-import User from "../models/users.model.js";
+import { Account , User} from "../models/index.js";
 
 
 
