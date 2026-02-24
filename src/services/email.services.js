@@ -54,7 +54,16 @@ async function sendLoggedInEmail(userEmail, userName) {
     await sendEmail(userEmail, subject, text, html);
 }
 
+async function sendTransactionEmail(userEmail, userName, amount, fromAccount, toAccount) {
+    const subject = 'Transaction Alert';
+    const transactionDetails = `Amount: ${amount}\nFrom Account: ${fromAccount}\nTo Account: ${toAccount}`;
+    const text = `Hi ${userName},\n\nA transaction has been made on your account:\n\n${transactionDetails}\n\nIf you did not authorize this transaction, please contact our support team immediately.\n\nBest regards,\nYour Company Name`;
+    const html = `<p>Hi ${userName},</p><p>A transaction has been made on your account:</p><pre>${transactionDetails}</pre><p>If you did not authorize this transaction, please contact our support team immediately.</p><p>Best regards,<br>Your Company Name</p>`;
+    await sendEmail(userEmail, subject, text, html);
+}
+
 export {
     sendRegistrationEmail,
-    sendLoggedInEmail
+    sendLoggedInEmail,
+    sendTransactionEmail
 }

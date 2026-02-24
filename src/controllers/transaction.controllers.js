@@ -1,5 +1,5 @@
 import {User, Account, Ledger, Transaction} from "../models/index.js";
-import email from "../services/email.service.js";
+import {sendTransactionEmail} from "../services/email.service.js";
 import mongoose from "mongoose";
 
 async function createTransactionController(req,res){
@@ -11,8 +11,8 @@ async function createTransactionController(req,res){
             });
         };
         //Check if accounts exist
-        const fromAccount = await Account.findById(fromAccountId);
-        const toAccount = await Account.findById(toAccountId);
+        const fromAccount = await Account.findByOne({_id:fromAccountId});
+        const toAccount = await Account.findByOne({_id:toAccountId});
         if(!fromAccount || !toAccount){
             return res.status(404).json({
                 message:"One or both accounts not found"
@@ -69,12 +69,34 @@ async function createTransactionController(req,res){
         }
         const session = await Transaction.startSession();
         session.startTransaction();
-        try{
-
-        }
-        catch(error){
-            
-        }
+        const transaction = await Transaction.create({
+            fromAccountId,
+            toAccountId,
+            amount,
+            idempotencyKey
+        }, {session});
+        const debitEntry = await Ledger.create({
+            account:fromAccount._id,
+            type:"Debit",
+            amount,
+            transaction:transaction._id
+        }, {session});
+        const creditEntry = await Ledger.create({
+            account:toAccount._id,
+            type:"Credit",
+            amount,
+            transaction:transaction._id
+        }, {session});
+        transaction.status = "Completed";
+        await transaction.save({session});
+        await session.commitTransaction();
+        await sendTransactionEmail(req.user.email, req.user.name, amount, fromAccount._id, toAccount._id);
+        return res.status(201).json({
+            message:"Transaction created successfully",
+            transaction,
+            debitEntry,
+            creditEntry
+        })
     }
     catch (error) {
         console.log("Error creating transaction", error);
