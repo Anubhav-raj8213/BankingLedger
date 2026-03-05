@@ -1,5 +1,5 @@
 import {User, Account, Ledger, Transaction} from "../models/index.js";
-import {sendTransactionEmail} from "../services/email.service.js";
+import {sendTransactionEmail} from "../services/email.services.js";
 import mongoose from "mongoose";
 
 async function createTransactionController(req,res){
@@ -101,7 +101,10 @@ async function createTransactionController(req,res){
     catch (error) {
         console.log("Error creating transaction", error);
         return res.status(500).json({
-            message:"Internal server error while creating transaction"
+            message:"Internal server error while creating transaction",
+            transaction:null,
+            debitEntry:null,
+            creditEntry:null
         })
     }
 }
